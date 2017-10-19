@@ -39,10 +39,10 @@ for a in ads:
         for r in range(len(prop)):
             adsdict[a][r] += getattr(element(e), prop[r])
 
-facetdict = {'0001': 1., '0001step': 2., '100': 3., '110': 4., '111': 5.,
-             '211': 6., '311': 7., '532': 8.}
+facetdict = {'0001': [1.], '0001step': [2.], '100': [3.], '110': [4.],
+             '111': [5.], '211': [6.], '311': [7.], '532': [8.]}
 
-sitedict = {'AA': 1., 'BA': 2., 'BB': 3.}
+sitedict = {'AA': [1.], 'BA': [2.], 'BB': [3.]}
 
 store_dict = {'adsdict': adsdict, 'facetdict': facetdict, 'elemdict': elemdict,
               'sitedict': sitedict}
@@ -50,13 +50,13 @@ store_dict = {'adsdict': adsdict, 'facetdict': facetdict, 'elemdict': elemdict,
 
 def finger(r):
     """Define feature space."""
-    afinger = adsdict[r['a']]
-    facetfinger = np.asarray([facetdict[r['facet']]])
-    m1finger = np.asarray(elemdict[r['m1']])
-    m2finger = np.asarray(elemdict[r['m2']])
+    afinger = np.asarray(store_dict['adsdict'][r['a']], np.float64)
+    facetfinger = np.asarray(store_dict['facetdict'][r['facet']], np.float64)
+    m1finger = np.asarray(store_dict['elemdict'][r['m1']], np.float64)
+    m2finger = np.asarray(store_dict['elemdict'][r['m2']], np.float64)
     msum = m1finger + m2finger
-    concfinger = np.asarray([r['conc']])
-    sitefinger = np.asarray([sitedict[r['site']]])
+    concfinger = np.asarray([r['conc']], np.float64)
+    sitefinger = np.asarray(store_dict['sitedict'][r['site']], np.float64)
 
     return np.concatenate((afinger, m1finger, m2finger, concfinger,
                            facetfinger, sitefinger, msum))
