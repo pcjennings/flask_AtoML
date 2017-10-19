@@ -6,7 +6,7 @@ import numpy as np
 from mendeleev import element
 # from atoml.regression import GaussianProcess
 from atoml.preprocess.feature_preprocess import normalize as standardize
-from finger_gen import finger
+from feature_generator import finger
 
 app = Flask(__name__)
 
