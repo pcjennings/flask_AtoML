@@ -1,14 +1,12 @@
 import flask
-from flask import Flask
 import pickle
 import numpy as np
 
 from mendeleev import element
-# from atoml.regression import GaussianProcess
-from atoml.preprocess.feature_preprocess import normalize as standardize
+
 from feature_generator import finger
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
 
 
 def get_input():
@@ -23,82 +21,10 @@ def get_model():
     return model
 
 
-def get_test1():
-    inp = get_input()
-    # Defining the finger vector
-    elemdict = {inp['m1']: []}  #, inp['s2']: []}
-
-    p = [
-        'period',
-        'group_id',
-        'atomic_number',
-        'atomic_volume',
-        'atomic_weight',
-        'melting_point',
-        'boiling_point',
-        'density',
-        'dipole_polarizability',
-        'lattice_constant',
-        'vdw_radius',
-        'covalent_radius_cordero',
-        'en_pauling',
-        'mass',
-        'heat_of_formation',
-    ]
-    for i in ['Fe']:
-        for j in p:
-            elemdict[i].append(getattr(element(i), j))
-
-    adslist = {
-           # 'C (graphene)': ['C'],
-           # 'CH2CH2': ['C', 'C', 'H', 'H', 'H', 'H'],
-           # 'CH3CH2CH3': ['C', 'C', 'C', 'H', 'H', 'H', 'H', 'H', 'H', 'H',
-           #             'H'],
-           # 'CH3CH3': ['C', 'C', 'H', 'H', 'H', 'H', 'H', 'H'],
-           'CO': ['C', 'O'],
-           # 'CO2': ['C', 'O', 'O'],
-           # 'H2O': ['H', 'H', 'O'],
-           # 'HCN': ['H', 'C', 'N'],
-           # 'NH3': ['N', 'H', 'H', 'H'],
-           # 'NO': ['N', 'O'],
-           # 'O2': ['O', 'O'],
-           # 'hfO2': ['O']
-           }
-
-    adsdict = {}
-    for i in adslist:
-        adsdict[i] = np.zeros(len(p))
-        for j in adslist[i]:
-            for k in range(len(p)):
-                adsdict[i][k] += getattr(element(j), p[k])
-
-    facetlist = {'0001': [1.], '0001step': [2.], '100': [3.], '110': [4.],
-                 '111': [5.], '211': [6.], '311': [7.], '532': [8.]}
-
-    sitelist = {'AA': [1.], 'BA': [2.], 'BB': [3.]}
-
-    f1 = np.asarray(adsdict[inp['ads']])
-    f2 = np.asarray(facetlist[inp['facet']])
-    f3 = np.asarray(elemdict[inp['s1']])
-    f4 = np.asarray(elemdict[inp['s2']])
-    f5 = np.asarray([inp['conc']])
-    f6 = np.asarray(sitelist[inp['site']])
-    f7 = np.array(elemdict[inp['s1']]) + np.array(elemdict[inp['s2']])
-
-    print(len(f1),len(f2),len(f3),len(f4),len(f5),len(f6),len(f7))
-
-    print(f3)
-    print(f4)
-    exit()
-
-    finger = list(np.concatenate((f1, f2, f3, f4, f5, f6, f7)))
-
-    return finger
-
-
 def get_test():
     inp = get_input()
     return finger(inp)
+
 
 def get_out():
     with open('gp_model.pickle', 'rb') as textfile:
@@ -158,7 +84,7 @@ def get_out():
 
 
 @app.route('/')
-def hello_world():
+def run_atoml_app():
     d = get_input()
     t, o = get_out()
     res = {'input': d, 'finger': t, 'output': o}
