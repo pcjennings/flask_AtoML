@@ -1,3 +1,4 @@
+"""Flask app for AtoML-CatApp model."""
 import flask
 import pickle
 import numpy as np
@@ -8,28 +9,34 @@ app = flask.Flask(__name__)
 
 
 def get_input():
+    """Define some static input for now."""
     d = {'m1': 'Fe', 'm2': 'Fe', 'facet': '110', 'a': 'CO', 'conc': '0.5',
          'site': 'AA'}
     return d
 
 
 def get_model():
-    with open('gp_model.pickle', 'rb') as textfile:
-        model = pickle.load(textfile)
+    """Load the generated model."""
+    with open('gp_model_01.pickle', 'rb') as modelfile:
+        model = pickle.load(modelfile)
     return model
 
 
-def get_test():
+def get_test_features():
+    """Get the features for the input system."""
     inp = get_input()
     return return_features(inp)
 
 
-def get_out():
-    with open('gp_model.pickle', 'rb') as textfile:
-        m = pickle.load(textfile)
+def get_output():
+    """Make the prediction on the input system."""
+    # Load the GP model.
+    m = get_model()
 
-    f = get_test()
+    # Load the features for the test system.
+    f = get_test_features()
 
+    # Some global scaling data generated previously.
     scale_mean = np.asarray([2.57943925e+00, 1.87096963e+01, 8.80782710e+00,
                              1.39537967e+01, 1.75185613e+01, 2.23380634e+03,
                              2.99258991e+03, 2.04580280e+00, 1.58569306e+01,
@@ -76,17 +83,22 @@ def get_out():
                             2.89000000e+00, 3.63997723e+02, 1.47840000e+03],
                            np.float64)
 
+    # Scale the test features.
     tfp = (np.array([f], np.float64) - scale_mean) / scale_dif
 
+    # Make the predictions.
     pred = m.predict(test_fp=tfp)
-    r = [pred['prediction'][0]]
-    return list(f), list(r)
+    result = [pred['prediction'][0]]
+
+    return list(f), result
 
 
 @app.route('/')
 def run_atoml_app():
-    d = get_input()
-    t, o = get_out()
-    res = {'input': d, 'finger': t, 'output': o}
-    res = flask.jsonify(**res)
-    return res
+    """The actual app to predict and generate output."""
+    data = get_input()
+    features, output = get_output()
+    return_dict = {'input': data, 'features': features, 'output': output}
+    return_dict = flask.jsonify(**return_dict)
+
+    return return_dict
