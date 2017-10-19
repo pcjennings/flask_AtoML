@@ -1,1 +1,2 @@
+numpy==1.13.3
 mendeleev==0.3.6

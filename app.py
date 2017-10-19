@@ -2,9 +2,7 @@ import flask
 import pickle
 import numpy as np
 
-from mendeleev import element
-
-from feature_generator import finger
+from feature_generator import return_features
 
 app = flask.Flask(__name__)
 
@@ -23,7 +21,7 @@ def get_model():
 
 def get_test():
     inp = get_input()
-    return finger(inp)
+    return return_features(inp)
 
 
 def get_out():
