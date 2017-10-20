@@ -96,8 +96,7 @@ def get_output(data):
 @app.route('/', methods=['GET', 'POST'])
 def run_atoml_app():
     """The actual app to predict and generate output."""
-    # data = flask.request.json  # get_input()
-    # print(data)
+    # data = get_input()
     if flask.request.headers['Content-Type'] == 'application/json':
         data = flask.request.json
     features, output = get_output(data)
@@ -109,4 +108,5 @@ def run_atoml_app():
 # To test you can type:
 
 # curl -H "Content-type: application/json" -X POST http://127.0.0.1:5000/ -d
-# '{"m1": "Fe", "m2": "Fe", "facet": "110", "a": "CO", "conc": "0.5", "site": "BA"}'
+# '{"m1": "Fe", "m2": "Fe", "facet": "110", "a": "CO", "conc": "0.5", "site":
+# "BA"}'
