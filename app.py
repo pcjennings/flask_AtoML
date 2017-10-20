@@ -107,6 +107,9 @@ def run_atoml_app():
 
 # To test you can type:
 
+# export FLASK_APP=app.py
+# flask run --host=0.0.0.0
+
 # curl -H "Content-type: application/json" -X POST http://127.0.0.1:5000/ -d
 # '{"m1": "Fe", "m2": "Fe", "facet": "110", "a": "CO", "conc": "0.5", "site":
 # "BA"}'
