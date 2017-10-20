@@ -88,7 +88,7 @@ def get_output(data):
 
     # Make the predictions.
     pred = m.predict(test_fp=tfp, uncertainty=True)
-    result = [pred['prediction'][0], pred['uncertainty'][0]]
+    result = [pred['prediction'][0], pred['uncertainty'][0] * 1.97897351706]
 
     return list(f), result
 
