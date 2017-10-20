@@ -10,8 +10,8 @@ app = flask.Flask(__name__)
 
 def get_input():
     """Define some static input for now."""
-    d = {'m1': 'Fe', 'm2': 'Fe', 'facet': '110', 'a': 'CO', 'conc': '0.5',
-         'site': 'AA'}
+    d = {"m1": "Fe", "m2": "Fe", "facet": "110", "a": "CO", "conc": "0.5",
+         "site": "AA"}
     return d
 
 
@@ -22,19 +22,19 @@ def get_model():
     return model
 
 
-def get_test_features():
+def get_test_features(data):
     """Get the features for the input system."""
-    inp = get_input()
+    inp = data  # get_input()
     return return_features(inp)
 
 
-def get_output():
+def get_output(data):
     """Make the prediction on the input system."""
     # Load the GP model.
     m = get_model()
 
     # Load the features for the test system.
-    f = get_test_features()
+    f = get_test_features(data)
 
     # Some global scaling data generated previously.
     scale_mean = np.asarray([2.57943925e+00, 1.87096963e+01, 8.80782710e+00,
@@ -87,18 +87,26 @@ def get_output():
     tfp = (np.array([f], np.float64) - scale_mean) / scale_dif
 
     # Make the predictions.
-    pred = m.predict(test_fp=tfp)
-    result = [pred['prediction'][0]]
+    pred = m.predict(test_fp=tfp, uncertainty=True)
+    result = [pred['prediction'][0], pred['uncertainty'][0]]
 
     return list(f), result
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def run_atoml_app():
     """The actual app to predict and generate output."""
-    data = get_input()
-    features, output = get_output()
+    # data = flask.request.json  # get_input()
+    # print(data)
+    if flask.request.headers['Content-Type'] == 'application/json':
+        data = flask.request.json
+    features, output = get_output(data)
     return_dict = {'input': data, 'features': features, 'output': output}
     return_dict = flask.jsonify(**return_dict)
 
     return return_dict
+
+# To test you can type:
+
+# curl -H "Content-type: application/json" -X POST http://127.0.0.1:5000/ -d
+# '{"m1": "Fe", "m2": "Fe", "facet": "110", "a": "CO", "conc": "0.5", "site": "BA"}'
