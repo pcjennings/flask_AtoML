@@ -1,5 +1,7 @@
 # Flask AtoML
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/d0aa66af28e0076b14f7/maintainability)](https://codeclimate.com/github/pcjennings/flask_AtoML/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/d0aa66af28e0076b14f7/test_coverage)](https://codeclimate.com/github/pcjennings/flask_AtoML/test_coverage)
+
 The backend for AtoML. It assumes that a model has been optimized and saved
 previously.
 
