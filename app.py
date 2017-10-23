@@ -1,11 +1,13 @@
 """Flask app for AtoML-CatApp model."""
-import flask
 import pickle
 import numpy as np
+import flask
+from flask_cors import CORS
 
 from feature_generator import return_features
 
 app = flask.Flask(__name__)
+CORS(app)
 
 
 def get_input():
@@ -97,9 +99,12 @@ def get_output(data):
 def run_atoml_app():
     """The actual app to predict and generate output."""
     # data = get_input()
-    if flask.request.headers['Content-Type'] == 'application/json':
-        data = flask.request.json
+    # if flask.request.headers['Content-Type'] == 'application/json':
+    data = flask.request.json
+    print(data)
+    data = {"m1": "Fe", "m2": "Fe", "facet": "110", "a": "CO", "conc": "0.5", "site": "BA"}
     features, output = get_output(data)
+    print(output)
     return_dict = {'input': data, 'features': features, 'output': output}
     return_dict = flask.jsonify(**return_dict)
 
