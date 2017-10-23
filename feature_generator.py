@@ -2,6 +2,7 @@
 import numpy as np
 import json
 
+from ase.data import ground_state_magnetic_moments, atomic_numbers
 from mendeleev import element
 
 
@@ -24,14 +25,45 @@ def return_features(inp):
                            facetfinger, sitefinger, msum))
 
 
+def _n_outer(econf):
+    """Return a list of the number of electrons in each shell.
+
+    Parameters
+    ----------
+    econf : str
+        electron configuration.
+    """
+    n_tot = 0
+    ns = 0
+    np = 0
+    nd = 0
+    nf = 0
+    for shell in econf.split(' ')[1:]:
+        n_shell = 0
+        if shell[-1].isalpha():
+            n_shell = 1
+        else:
+            n_shell = int(shell[-1])
+        n_tot += n_shell
+        if 's' in shell:
+            ns += n_shell
+        elif 'p' in shell:
+            np += n_shell
+        elif 'd' in shell:
+            nd += n_shell
+        elif 'f' in shell:
+            nf += n_shell
+    return n_tot, ns, np, nd, nf
+
+
 def _feature_generate():
     """Base generator."""
     # Define atomic properties to add as features.
     prop = ['period', 'group_id', 'atomic_number', 'atomic_volume',
-            'atomic_weight', 'melting_point', 'boiling_point', 'density',
+            'melting_point', 'boiling_point', 'density',
             'dipole_polarizability', 'lattice_constant', 'vdw_radius',
             'covalent_radius_cordero', 'en_pauling', 'mass',
-            'heat_of_formation']
+            'heat_of_formation', 'block', 'econf']
 
     # Initialize finger vector for support elements.
     elemdict = {'Ag': [], 'Al': [], 'As': [], 'Au': [], 'B': [], 'Ba': [],
@@ -44,10 +76,18 @@ def _feature_generate():
                 'Sn': [], 'Sr': [], 'Ta': [], 'Te': [], 'Ti': [], 'Tl': [],
                 'V': [], 'W': [], 'Y': [], 'Zn': [], 'Zr': []}
 
+    block2num = {'s': 1, 'p': 2, 'd': 3, 'f': 4}
+
     # Generate the features for all support elements.
     for e in elemdict:
         for p in prop:
-            elemdict[e].append(getattr(element(e), p))
+            attr = [getattr(element(e), p)]
+            if p is 'block':
+                attr = [block2num[attr[0]]]
+            elif p is 'econf':
+                attr = list(_n_outer(attr[0]))
+            elemdict[e] += attr
+        elemdict[e].append(ground_state_magnetic_moments[atomic_numbers[e]])
     elemdict['La'][1] = 2.5
 
     # Define the avaliable adsorbates.
@@ -63,7 +103,12 @@ def _feature_generate():
         adsdict[a] = list(np.zeros(len(prop)))
         for e in ads[a]:
             for r in range(len(prop)):
-                adsdict[a][r] += getattr(element(e), prop[r])
+                attr = getattr(element(e), prop[r])
+                if prop[r] is 'block':
+                    attr = block2num[attr]
+                if prop[r] is 'econf':
+                    attr = _n_outer(attr)[0]
+                adsdict[a][r] += attr
 
     # Define facet features.
     facetdict = {'0001': [1.], '0001step': [2.], '100': [3.], '110': [4.],
