@@ -53,14 +53,19 @@ def _n_outer(econf):
     return n_tot, ns, np, nd, nf
 
 
-def _feature_generate():
-    """Base generator."""
+def _atomic_properties():
     # Define atomic properties to add as features.
     prop = ['period', 'group_id', 'atomic_number', 'atomic_volume',
             'melting_point', 'boiling_point', 'density',
             'dipole_polarizability', 'lattice_constant', 'vdw_radius',
             'covalent_radius_cordero', 'en_pauling', 'mass',
             'heat_of_formation', 'block', 'econf']
+
+    return prop
+
+
+def _support_features():
+    prop = _atomic_properties()
 
     # Initialize finger vector for support elements.
     elemdict = {'Ag': [], 'Al': [], 'As': [], 'Au': [], 'B': [], 'Ba': [],
@@ -87,12 +92,20 @@ def _feature_generate():
         elemdict[e].append(ground_state_magnetic_moments[atomic_numbers[e]])
     elemdict['La'][1] = 2.5
 
+    return elemdict
+
+
+def _adsorbate_features():
+    prop = _atomic_properties()
+
     # Define the avaliable adsorbates.
     ads = {'C (graphene)': ['C'], 'CH2CH2': ['C']*2 + ['H']*4,
            'CH3CH2CH3': ['C']*3 + ['H']*8, 'CH3CH3': ['C']*2 + ['H']*6,
            'CO': ['C', 'O'], 'CO2': ['C'] + ['O']*2, 'H2O': ['H']*2 + ['O'],
            'HCN': ['H', 'C', 'N'], 'NH3': ['N'] + ['H']*3, 'NO': ['N', 'O'],
            'O2': ['O']*2, 'hfO2': ['O']}
+
+    block2num = {'s': 1, 'p': 2, 'd': 3, 'f': 4}
 
     # Generate the summed features for all adsorbate elements.
     adsdict = {}
@@ -106,6 +119,14 @@ def _feature_generate():
                 if prop[r] is 'econf':
                     attr = _n_outer(attr)[0]
                 adsdict[a][r] += attr
+
+    return adsdict
+
+
+def _feature_generate():
+    """Base generator."""
+    elemdict = _support_features()
+    adsdict = _adsorbate_features()
 
     # Define facet features.
     facetdict = {'0001': [1.], '0001step': [2.], '100': [3.], '110': [4.],
