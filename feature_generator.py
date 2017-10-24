@@ -33,11 +33,7 @@ def _n_outer(econf):
     econf : str
         electron configuration.
     """
-    n_tot = 0
-    ns = 0
-    np = 0
-    nd = 0
-    nf = 0
+    n_tot, ns, np, nd, nf = 0, 0, 0, 0, 0
     for shell in econf.split(' ')[1:]:
         n_shell = 0
         if shell[-1].isalpha():
@@ -53,6 +49,7 @@ def _n_outer(econf):
             nd += n_shell
         elif 'f' in shell:
             nf += n_shell
+
     return n_tot, ns, np, nd, nf
 
 
