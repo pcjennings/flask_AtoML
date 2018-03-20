@@ -1,4 +1,7 @@
 """Base feature generation."""
+from __future__ import absolute_import
+from __future__ import division
+
 import numpy as np
 import json
 
@@ -17,7 +20,7 @@ def return_features(inp):
     facetfinger = np.asarray(store_dict['facetdict'][inp['facet']], np.float64)
     m1finger = np.asarray(store_dict['elemdict'][inp['m1']], np.float64)
     m2finger = np.asarray(store_dict['elemdict'][inp['m2']], np.float64)
-    msum = m1finger + m2finger
+    msum = list(np.nansum([m1finger + m2finger], axis=0, dtype=float))
     concfinger = np.asarray([inp['conc']], np.float64)
     sitefinger = np.asarray(store_dict['sitedict'][inp['site']], np.float64)
 
@@ -38,8 +41,10 @@ def _n_outer(econf):
         n_shell = 0
         if shell[-1].isalpha():
             n_shell = 1
-        else:
+        elif len(shell) == 3:
             n_shell = int(shell[-1])
+        elif len(shell) == 4:
+            n_shell = int(shell[-2:])
         n_tot += n_shell
         if 's' in shell:
             ns += n_shell
@@ -49,23 +54,17 @@ def _n_outer(econf):
             nd += n_shell
         elif 'f' in shell:
             nf += n_shell
-
     return n_tot, ns, np, nd, nf
 
 
-def _atomic_properties():
+def _feature_generate():
+    """Base generator."""
     # Define atomic properties to add as features.
     prop = ['period', 'group_id', 'atomic_number', 'atomic_volume',
-            'melting_point', 'boiling_point', 'density',
+            'melting_point', 'boiling_point', 'density', 'electron_affinity',
             'dipole_polarizability', 'lattice_constant', 'vdw_radius',
-            'covalent_radius_cordero', 'en_pauling', 'mass',
+            'covalent_radius_cordero', 'en_allen', 'mass',
             'heat_of_formation', 'block', 'econf']
-
-    return prop
-
-
-def _support_features():
-    prop = _atomic_properties()
 
     # Initialize finger vector for support elements.
     elemdict = {'Ag': [], 'Al': [], 'As': [], 'Au': [], 'B': [], 'Ba': [],
@@ -90,13 +89,7 @@ def _support_features():
                 attr = list(_n_outer(attr[0]))
             elemdict[e] += attr
         elemdict[e].append(ground_state_magnetic_moments[atomic_numbers[e]])
-    elemdict['La'][1] = 2.5
-
-    return elemdict
-
-
-def _adsorbate_features():
-    prop = _atomic_properties()
+    elemdict['La'][1] = 3.
 
     # Define the avaliable adsorbates.
     ads = {'C (graphene)': ['C'], 'CH2CH2': ['C']*2 + ['H']*4,
@@ -105,28 +98,24 @@ def _adsorbate_features():
            'HCN': ['H', 'C', 'N'], 'NH3': ['N'] + ['H']*3, 'NO': ['N', 'O'],
            'O2': ['O']*2, 'hfO2': ['O']}
 
-    block2num = {'s': 1, 'p': 2, 'd': 3, 'f': 4}
-
     # Generate the summed features for all adsorbate elements.
     adsdict = {}
     for a in ads:
         adsdict[a] = list(np.zeros(len(prop)))
+        if 'econf' in prop:
+            adsdict[a] += [0] * 4
         for e in ads[a]:
             for r in range(len(prop)):
                 attr = getattr(element(e), prop[r])
                 if prop[r] is 'block':
                     attr = block2num[attr]
                 if prop[r] is 'econf':
-                    attr = _n_outer(attr)[0]
-                adsdict[a][r] += attr
-
-    return adsdict
-
-
-def _feature_generate():
-    """Base generator."""
-    elemdict = _support_features()
-    adsdict = _adsorbate_features()
+                    attr = _n_outer(attr)
+                    for shell in range(len(attr)):
+                        adsdict[a][r + shell] += attr[shell]
+                else:
+                    adsdict[a][r] += attr
+            adsdict[a][-1] += ground_state_magnetic_moments[atomic_numbers[e]]
 
     # Define facet features.
     facetdict = {'0001': [1.], '0001step': [2.], '100': [3.], '110': [4.],
