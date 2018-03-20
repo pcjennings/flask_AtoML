@@ -4,6 +4,8 @@
 
 The backend for AtoML. It assumes that a model has been optimized and saved previously.
 
+## Usage
+
 To run the app, use:
 
 ```shell
@@ -17,7 +19,12 @@ To make the app publicly visible, use:
   $ flask run --host=0.0.0.0
 ```
 
-### Requirements
+## Requirements
 
-*   numpy
-*   mendeleev
+*   [AtoML](https://gitlab.com/atoml/AtoML)
+*   [numpy](http://www.numpy.org/)
+*   [mendeleev](https://pypi.python.org/pypi/mendeleev/)
+
+## Data
+
+There is currently the original CatApp data for building a model.
