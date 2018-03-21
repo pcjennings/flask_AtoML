@@ -25,6 +25,22 @@ To make the app publicly visible, use:
 *   [numpy](http://www.numpy.org/)
 *   [mendeleev](https://pypi.python.org/pypi/mendeleev/)
 
-## Data
+## Builds
+
+The scripts to build the models are located in this directory.
+
+## Featurize
+
+The directory contains scripts to featurize user input data.
+
+## Models
+
+The saved models.
+
+## Raw Data
 
 There is currently the original CatApp data for building a model.
+
+## Train Data
+
+The stored featurized data set.

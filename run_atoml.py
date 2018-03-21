@@ -3,7 +3,7 @@ import pickle
 import flask
 from flask_cors import CORS
 
-from feature_generator import return_features
+from featurize.feature_generator import return_features
 
 app = flask.Flask(__name__)
 CORS(app)
@@ -22,7 +22,7 @@ def run_atoml_app():
 
 def _get_model():
     """Load the generated model."""
-    with open('model/gp_model_01.pickle', 'rb') as modelfile:
+    with open('models/gp_model_01.pickle', 'rb') as modelfile:
         model = pickle.load(modelfile)
     return model
 
