@@ -12,7 +12,7 @@ from mendeleev import element
 def return_features(inp):
     """Return feature space."""
     # Open previously generated features.
-    with open('../data/feature_store.json', 'r') as featurefile:
+    with open('raw_data/feature_store.json', 'r') as featurefile:
         store_dict = json.load(featurefile)
 
     # Pull out all relevant features for supplied system.

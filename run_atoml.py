@@ -2,8 +2,9 @@
 import pickle
 import flask
 from flask_cors import CORS
+import numpy as np
 
-from featurize.feature_generator import return_features
+from featurize.catapp_user import return_features
 
 app = flask.Flask(__name__)
 CORS(app)
@@ -22,7 +23,7 @@ def run_atoml_app():
 
 def _get_model():
     """Load the generated model."""
-    with open('models/gp_model_01.pickle', 'rb') as modelfile:
+    with open('models/catapp_gp_model.pickle', 'rb') as modelfile:
         model = pickle.load(modelfile)
     return model
 
@@ -33,11 +34,12 @@ def _get_output(data):
     model = _get_model()
 
     # Load the features for the test system.
-    features = return_features(data)
+    features = np.array([return_features(data)])
+    features = np.delete(features, [28, 33, 50, 55, 19], axis=1).tolist()
 
     # Make the predictions.
     pred = model.predict(test_fp=features, uncertainty=True)
-    result = {'energy': round(pred['prediction'][0], 3),
-              'uncertainty': round(pred['uncertainty'][0], 3)}
+    result = {'energy': round(float(pred['prediction'][0]), 3),
+              'uncertainty': round(float(pred['uncertainty'][0]), 3)}
 
-    return list(features), result
+    return features, result
